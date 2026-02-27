@@ -251,18 +251,18 @@
 
     <script>
         function handleClick(e) {
-            const btn = document.getElementById('mainButton');
-            const status = document.getElementById('status');
+            var btn = document.getElementById('mainButton');
+            var status = document.getElementById('status');
 
             // Ripple
-            const ripple = document.createElement('span');
+            var ripple = document.createElement('span');
             ripple.classList.add('ripple');
-            const rect = btn.getBoundingClientRect();
+            var rect = btn.getBoundingClientRect();
             ripple.style.left = (e.clientX - rect.left) + 'px';
             ripple.style.top = (e.clientY - rect.top) + 'px';
             ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
             btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
+            setTimeout(function() { ripple.remove(); }, 600);
 
             btn.classList.add('generating');
             btn.textContent = 'Fetching good boy...';
@@ -271,10 +271,16 @@
 
             // Fetch random dog image
             fetch('https://dog.ceo/api/breeds/image/random')
-                .then(r => r.json())
-                .then(data => {
-                    const dogUrl = data.message;
-                    const resultTab = window.open('', '_blank');
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var dogUrl = data.message;
+                    var resultTab = window.open('', '_blank');
+                    if (!resultTab) {
+                        status.textContent = 'Pop-up blocked. Please allow pop-ups for this site.';
+                        btn.classList.remove('generating');
+                        btn.textContent = 'Press here, Recess user';
+                        return;
+                    }
                     resultTab.document.write(buildOutputPage(dogUrl));
                     resultTab.document.close();
 
@@ -282,9 +288,9 @@
                     btn.textContent = 'Press here, Recess user';
                     status.textContent = 'Good boy opened in new tab';
                     status.classList.add('active');
-                    setTimeout(() => { status.textContent = ''; status.classList.remove('active'); }, 3000);
+                    setTimeout(function() { status.textContent = ''; status.classList.remove('active'); }, 3000);
                 })
-                .catch(err => {
+                .catch(function(err) {
                     btn.classList.remove('generating');
                     btn.textContent = 'Press here, Recess user';
                     status.textContent = 'Error: ' + err.message;
@@ -292,282 +298,104 @@
         }
 
         function buildOutputPage(dogUrl) {
-            return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recess — Pet the Dog</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --teal: #13bad5;
-            --teal-dark: #0fa3bb;
-            --teal-dim: rgba(19,186,213,0.12);
-            --orange: #ff8900;
-            --black: #0a0a0a;
-            --dark: #111214;
-            --dark2: #1a1c1f;
-            --dark3: #222428;
-            --mid: #2e3035;
-            --white: #ffffff;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--black);
-            color: var(--white);
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
+            var hearts = ['\u2764\uFE0F', '\uD83D\uDC9B', '\uD83D\uDC99', '\uD83D\uDC9A', '\uD83E\uDD0D'];
+            var heartsJSON = JSON.stringify(hearts);
 
-        .header {
-            padding: 0 48px;
-            height: 68px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .logo-img {
-            height: 24px;
-            filter: brightness(0) invert(1);
-            opacity: 0.95;
-        }
-        .logo-fallback {
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--teal);
-        }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(22,163,74,0.15);
-            border: 1px solid rgba(22,163,74,0.3);
-            color: #4ade80;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            padding: 5px 12px;
-            border-radius: 100px;
-        }
-        .badge::before {
-            content: '';
-            width: 5px;
-            height: 5px;
-            background: #4ade80;
-            border-radius: 50%;
-        }
-        .download-btn {
-            background: var(--orange);
-            color: var(--white);
-            border: none;
-            padding: 10px 24px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.15s;
-            letter-spacing: -0.01em;
-        }
-        .download-btn:hover {
-            background: #e67a00;
-            transform: translateY(-1px);
-        }
-        .download-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-        }
-
-        .content {
-            max-width: 600px;
-            margin: 48px auto;
-            padding: 0 48px;
-            text-align: center;
-        }
-
-        .status-text {
-            font-size: 15px;
-            font-weight: 700;
-            color: #4ade80;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-
-        .instruction {
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            margin-bottom: 32px;
-            line-height: 1.2;
-        }
-        .instruction .accent { color: var(--teal); }
-
-        .dog-container {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-            margin-bottom: 16px;
-        }
-
-        .dog-container img {
-            width: 100%;
-            max-width: 460px;
-            height: 380px;
-            object-fit: cover;
-            border-radius: 16px;
-            border: 2px solid var(--mid);
-            display: block;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            transform-origin: center bottom;
-        }
-
-        .dog-container img.pet {
-            transform: perspective(600px) rotateX(15deg) scale(0.97);
-        }
-
-        .dog-container img:hover {
-            border-color: var(--teal);
-        }
-
-        .pet-counter {
-            margin-top: 16px;
-            font-size: 13px;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: -0.01em;
-            transition: all 0.2s;
-        }
-        .pet-counter strong {
-            color: var(--teal);
-            font-weight: 700;
-        }
-
-        .heart-float {
-            position: absolute;
-            font-size: 28px;
-            pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
-            z-index: 10;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
-        }
-
-        .click-hint {
-            font-size: 11px;
-            color: rgba(255,255,255,0.2);
-            margin-top: 4px;
-            letter-spacing: 0.3px;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 32px;
-            font-size: 11px;
-            color: rgba(255,255,255,0.15);
-            letter-spacing: 0.5px;
-        }
-
-        @media (max-width: 600px) {
-            .header { padding: 0 24px; }
-            .content { padding: 0 24px; margin: 32px auto; }
-            .dog-container img { height: 280px; }
-            .instruction { font-size: 20px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-left">
-            <img
-                src="https://cdn.prod.website-files.com/64ff2fd4c0c0c110f9ca6543/64ff74900e799e5bd71e5bca_recess.svg"
-                alt="recess"
-                class="logo-img"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
-            >
-            <span class="logo-fallback" style="display:none">recess</span>
-            <div class="badge">Complete</div>
-        </div>
-        <a class="download-btn" id="downloadBtn" href="${dogUrl}" download="recess_good_boy.jpg" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            Download Dog
-        </a>
-    </div>
-
-    <div class="content">
-        <div class="status-text">Button has been pressed.</div>
-        <div class="instruction">Please pet the <span class="accent">dog.</span></div>
-
-        <div class="dog-container" id="dogContainer" onclick="petDog(event)">
-            <img id="dogImg" src="${dogUrl}" alt="A good dog" crossorigin="anonymous">
-        </div>
-
-        <div class="pet-counter" id="petCounter">Click the dog to pet it</div>
-        <div class="click-hint">Each click = one pet</div>
-
-        <div class="footer-note">Proof of Concept v0.1 &mdash; recess automation</div>
-    </div>
-
-    <script>
-        let petCount = 0;
-        const messages = [
-            'Good boy appreciates that.',
-            'Tail wagging intensifies.',
-            'The goodest boy.',
-            'Pet received. Happiness increased.',
-            'Bork bork. More please.',
-            'This dog is having the best day.',
-            'You are now this dog\\'s favorite person.',
-            'Maximum tail wag achieved.',
-            'Dog.exe is running at peak happiness.',
-            'This is what peak performance looks like.'
-        ];
-
-        function petDog(e) {
-            const img = document.getElementById('dogImg');
-            const counter = document.getElementById('petCounter');
-            const container = document.getElementById('dogContainer');
-            petCount++;
-
-            // Bow animation
-            img.classList.add('pet');
-            setTimeout(() => img.classList.remove('pet'), 300);
-
-            // Float a heart from click position
-            const heart = document.createElement('div');
-            heart.classList.add('heart-float');
-            heart.textContent = petCount % 5 === 0 ? '\u2764\uFE0F' : ['\U0001F49B', '\U0001F499', '\U0001F49A', '\U0001F90D'][Math.floor(Math.random() * 4)];
-            const rect = container.getBoundingClientRect();
-            heart.style.left = (e.clientX - rect.left - 14) + 'px';
-            heart.style.top = (e.clientY - rect.top - 14) + 'px';
-            container.appendChild(heart);
-            setTimeout(() => heart.remove(), 1000);
-
-            // Update counter
-            const msg = messages[Math.min(petCount - 1, messages.length - 1)];
-            counter.innerHTML = '<strong>' + petCount + ' pet' + (petCount === 1 ? '' : 's') + '</strong> — ' + msg;
-        }
-    </script>
-</body>
-</html>`;
+            return '<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+'<meta charset="UTF-8">' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+'<title>Recess \u2014 Pet the Dog</title>' +
+'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' +
+'<style>' +
+':root { --teal: #13bad5; --teal-dark: #0fa3bb; --teal-dim: rgba(19,186,213,0.12); --orange: #ff8900; --black: #0a0a0a; --dark: #111214; --dark2: #1a1c1f; --dark3: #222428; --mid: #2e3035; --white: #ffffff; }' +
+'* { margin: 0; padding: 0; box-sizing: border-box; }' +
+'body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; background: var(--black); color: var(--white); min-height: 100vh; -webkit-font-smoothing: antialiased; }' +
+'.header { padding: 0 48px; height: 68px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }' +
+'.header-left { display: flex; align-items: center; gap: 16px; }' +
+'.logo-img { height: 24px; filter: brightness(0) invert(1); opacity: 0.95; }' +
+'.logo-fallback { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--teal); }' +
+'.badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(22,163,74,0.15); border: 1px solid rgba(22,163,74,0.3); color: #4ade80; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; padding: 5px 12px; border-radius: 100px; }' +
+'.badge::before { content: ""; width: 5px; height: 5px; background: #4ade80; border-radius: 50%; }' +
+'.download-btn { background: var(--orange); color: var(--white); border: none; padding: 10px 24px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; letter-spacing: -0.01em; }' +
+'.download-btn:hover { background: #e67a00; transform: translateY(-1px); }' +
+'.download-btn svg { width: 14px; height: 14px; fill: currentColor; }' +
+'.content { max-width: 600px; margin: 48px auto; padding: 0 48px; text-align: center; }' +
+'.status-text { font-size: 15px; font-weight: 700; color: #4ade80; margin-bottom: 8px; letter-spacing: -0.02em; }' +
+'.instruction { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 32px; line-height: 1.2; }' +
+'.instruction .accent { color: var(--teal); }' +
+'.dog-container { position: relative; display: inline-block; cursor: pointer; user-select: none; -webkit-user-select: none; margin-bottom: 16px; }' +
+'.dog-container img { width: 100%; max-width: 460px; height: 380px; object-fit: cover; border-radius: 16px; border: 2px solid var(--mid); display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: center bottom; }' +
+'.dog-container img.pet { transform: perspective(600px) rotateX(15deg) scale(0.97); }' +
+'.dog-container img:hover { border-color: var(--teal); }' +
+'.pet-counter { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: -0.01em; transition: all 0.2s; }' +
+'.pet-counter strong { color: var(--teal); font-weight: 700; }' +
+'.heart-float { position: absolute; font-size: 28px; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 10; }' +
+'@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.4); } }' +
+'.click-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 4px; letter-spacing: 0.3px; }' +
+'.footer-note { text-align: center; margin-top: 32px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px; }' +
+'@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 32px auto; } .dog-container img { height: 280px; } .instruction { font-size: 20px; } }' +
+'</style>' +
+'</head>' +
+'<body>' +
+'<div class="header">' +
+'<div class="header-left">' +
+'<img src="https://cdn.prod.website-files.com/64ff2fd4c0c0c110f9ca6543/64ff74900e799e5bd71e5bca_recess.svg" alt="recess" class="logo-img" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'block\'">' +
+'<span class="logo-fallback" style="display:none">recess</span>' +
+'<div class="badge">Complete</div>' +
+'</div>' +
+'<a class="download-btn" href="' + dogUrl + '" download="recess_good_boy.jpg" target="_blank">' +
+'<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>' +
+'Download Dog' +
+'</a>' +
+'</div>' +
+'<div class="content">' +
+'<div class="status-text">Button has been pressed.</div>' +
+'<div class="instruction">Please pet the <span class="accent">dog.</span></div>' +
+'<div class="dog-container" id="dogContainer" onclick="petDog(event)">' +
+'<img id="dogImg" src="' + dogUrl + '" alt="A good dog">' +
+'</div>' +
+'<div class="pet-counter" id="petCounter">Click the dog to pet it</div>' +
+'<div class="click-hint">Each click = one pet</div>' +
+'<div class="footer-note">Proof of Concept v0.1 \u2014 recess automation</div>' +
+'</div>' +
+'<script>' +
+'var petCount = 0;' +
+'var hearts = ' + heartsJSON + ';' +
+'var messages = [' +
+'"Good boy appreciates that.",' +
+'"Tail wagging intensifies.",' +
+'"The goodest boy.",' +
+'"Pet received. Happiness increased.",' +
+'"Bork bork. More please.",' +
+'"This dog is having the best day.",' +
+'"You are now the favorite person.",' +
+'"Maximum tail wag achieved.",' +
+'"Dog.exe is running at peak happiness.",' +
+'"This is what peak performance looks like."' +
+'];' +
+'function petDog(e) {' +
+'var img = document.getElementById("dogImg");' +
+'var counter = document.getElementById("petCounter");' +
+'var container = document.getElementById("dogContainer");' +
+'petCount++;' +
+'img.classList.add("pet");' +
+'setTimeout(function() { img.classList.remove("pet"); }, 300);' +
+'var heart = document.createElement("div");' +
+'heart.classList.add("heart-float");' +
+'heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];' +
+'var rect = container.getBoundingClientRect();' +
+'heart.style.left = (e.clientX - rect.left - 14) + "px";' +
+'heart.style.top = (e.clientY - rect.top - 14) + "px";' +
+'container.appendChild(heart);' +
+'setTimeout(function() { heart.remove(); }, 1000);' +
+'var msg = messages[Math.min(petCount - 1, messages.length - 1)];' +
+'counter.innerHTML = "<strong>" + petCount + " pet" + (petCount === 1 ? "" : "s") + "</strong> \u2014 " + msg;' +
+'}' +
+'<\/script>' +
+'</body>' +
+'</html>';
         }
     </script>
 </body>
