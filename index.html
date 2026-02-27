@@ -4,153 +4,262 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recess — Automation Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --teal: #13bad5;
+            --teal-dark: #0fa3bb;
+            --teal-dim: rgba(19,186,213,0.12);
+            --orange: #ff8900;
+            --orange-dark: #e67a00;
+            --black: #0a0a0a;
+            --dark: #111214;
+            --dark2: #1a1c1f;
+            --dark3: #222428;
+            --mid: #2e3035;
+            --white: #ffffff;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            padding: 0 48px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logo-img {
+            height: 24px;
+            filter: brightness(0) invert(1);
+            opacity: 0.95;
+        }
+
+        .logo-fallback {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--teal);
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--teal-dim);
+            border: 1px solid rgba(19,186,213,0.25);
+            color: var(--teal);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 5px 12px;
+            border-radius: 100px;
+        }
+
+        .header-badge span {
+            width: 5px;
+            height: 5px;
+            background: var(--teal);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            color: #1a1a1a;
-        }
-
-        .container {
-            text-align: center;
             padding: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: 8px;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-            text-transform: uppercase;
+        .main::before {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(19,186,213,0.08) 0%, transparent 65%);
+            pointer-events: none;
         }
 
-        .logo span {
-            color: #2563EB;
+        .main::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,137,0,0.05) 0%, transparent 60%);
+            pointer-events: none;
         }
+
+        .content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .title .accent { color: var(--teal); }
 
         .subtitle {
-            font-size: 14px;
-            color: #94a3b8;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 60px;
+            font-size: 15px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: -0.01em;
+            margin-bottom: 56px;
         }
 
-        .button-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
+        /* Button */
         .big-button {
-            background: #2563EB;
-            color: #ffffff;
+            background: var(--teal);
+            color: var(--white);
             border: none;
-            padding: 28px 64px;
+            padding: 32px 72px;
+            font-family: 'Inter', sans-serif;
             font-size: 20px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            border-radius: 16px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 24px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 32px rgba(19,186,213,0.3);
             position: relative;
             overflow: hidden;
         }
 
         .big-button:hover {
-            background: #1d4ed8;
+            background: var(--teal-dark);
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 8px 40px rgba(19,186,213,0.4);
         }
 
         .big-button:active {
             transform: translateY(1px);
-            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 2px 16px rgba(19,186,213,0.3);
         }
 
-        .big-button.success {
-            background: #16a34a;
-            box-shadow: 0 4px 24px rgba(22, 163, 74, 0.3);
+        .big-button.generating {
+            background: var(--orange);
+            box-shadow: 0 4px 32px rgba(255,137,0,0.3);
         }
 
         .big-button .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255,255,255,0.3);
             transform: scale(0);
             animation: ripple 0.6s ease-out;
             pointer-events: none;
         }
 
         @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
+            to { transform: scale(4); opacity: 0; }
         }
 
         .status {
             margin-top: 24px;
-            font-size: 14px;
-            color: #94a3b8;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
             height: 20px;
             transition: all 0.3s ease;
         }
 
         .status.active {
-            color: #16a34a;
-            font-weight: 500;
+            color: var(--teal);
+            font-weight: 600;
         }
 
+        /* Footer */
         .footer {
-            position: fixed;
-            bottom: 24px;
-            font-size: 12px;
-            color: #cbd5e1;
-            letter-spacing: 1px;
+            padding: 20px 48px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 600px) {
-            .logo { font-size: 32px; letter-spacing: 6px; }
-            .big-button { padding: 24px 48px; font-size: 18px; }
+            .header { padding: 0 24px; }
+            .main { padding: 40px 24px; }
+            .big-button { padding: 28px 48px; font-size: 18px; }
+            .footer { padding: 16px 24px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">R<span>E</span>CESS</div>
-        <div class="subtitle">Automation Hub</div>
 
-        <div class="button-wrapper">
+    <div class="header">
+        <a href="https://recess.is" style="text-decoration: none; display: flex; align-items: center;">
+            <img
+                src="https://cdn.prod.website-files.com/64ff2fd4c0c0c110f9ca6543/64ff74900e799e5bd71e5bca_recess.svg"
+                alt="recess"
+                class="logo-img"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+            >
+            <span class="logo-fallback" style="display:none">recess</span>
+        </a>
+        <div class="header-badge">
+            <span></span>
+            Automation Hub
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="content">
+            <div class="title">One button.<br><span class="accent">Every output.</span></div>
+            <div class="subtitle">Press to trigger workflow and generate your deliverable.</div>
+
             <button class="big-button" id="mainButton" onclick="handleClick(event)">
                 Press here, Recess user
             </button>
-        </div>
 
-        <div class="status" id="status"></div>
+            <div class="status" id="status"></div>
+        </div>
     </div>
 
-    <div class="footer">Proof of Concept v0.1</div>
+    <div class="footer">Proof of Concept v0.1 &mdash; recess automation</div>
 
     <script>
         function handleClick(e) {
             const btn = document.getElementById('mainButton');
             const status = document.getElementById('status');
 
-            // Ripple effect
+            // Ripple
             const ripple = document.createElement('span');
             ripple.classList.add('ripple');
             const rect = btn.getBoundingClientRect();
@@ -160,8 +269,7 @@
             btn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
 
-            // Update button state
-            btn.classList.add('success');
+            btn.classList.add('generating');
             btn.textContent = 'Generating...';
             status.textContent = '';
             status.classList.remove('active');
@@ -172,153 +280,235 @@
                     const timestamp = now.toISOString().replace('T', ' ').split('.')[0];
                     const fileDate = now.toISOString().slice(0, 10).replace(/-/g, '');
 
-                    // Build XLSX in memory
+                    // Build XLSX
                     const data = [
                         ['Status', 'Timestamp', 'Message'],
                         ['Confirmed', timestamp, 'Button pressed. Recess workflow triggered.']
                     ];
-
                     const wb = XLSX.utils.book_new();
                     const ws = XLSX.utils.aoa_to_sheet(data);
                     ws['!cols'] = [{ wch: 15 }, { wch: 22 }, { wch: 45 }];
                     XLSX.utils.book_append_sheet(wb, ws, 'Recess Output');
 
-                    // Generate download blob
                     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
                     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     const blobUrl = URL.createObjectURL(blob);
 
-                    // Open results in new tab
+                    // Open output tab
                     const resultTab = window.open('', '_blank');
-                    resultTab.document.write(`
-<!DOCTYPE html>
+                    resultTab.document.write(buildOutputPage(timestamp, fileDate, blobUrl));
+                    resultTab.document.close();
+
+                    // Reset
+                    btn.classList.remove('generating');
+                    btn.textContent = 'Press here, Recess user';
+                    status.textContent = 'Output opened in new tab';
+                    status.classList.add('active');
+                    setTimeout(() => { status.textContent = ''; status.classList.remove('active'); }, 3000);
+
+                } catch (err) {
+                    btn.classList.remove('generating');
+                    btn.textContent = 'Press here, Recess user';
+                    status.textContent = 'Error: ' + err.message;
+                }
+            }, 600);
+        }
+
+        function buildOutputPage(timestamp, fileDate, blobUrl) {
+            return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recess — Output</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --teal: #13bad5;
+            --teal-dark: #0fa3bb;
+            --teal-dim: rgba(19,186,213,0.12);
+            --orange: #ff8900;
+            --black: #0a0a0a;
+            --dark: #111214;
+            --dark2: #1a1c1f;
+            --dark3: #222428;
+            --mid: #2e3035;
+            --white: #ffffff;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            color: var(--white);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
+
         .header {
-            background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 24px 40px;
+            padding: 0 48px;
+            height: 68px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .header-left {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 5px;
-            text-transform: uppercase;
+        .logo-img {
+            height: 24px;
+            filter: brightness(0) invert(1);
+            opacity: 0.95;
         }
-        .logo span { color: #2563EB; }
+        .logo-fallback {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--teal);
+        }
         .badge {
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(22,163,74,0.15);
+            border: 1px solid rgba(22,163,74,0.3);
+            color: #4ade80;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 5px 12px;
+            border-radius: 100px;
+        }
+        .badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            background: #4ade80;
+            border-radius: 50%;
         }
         .download-btn {
-            background: #2563EB;
-            color: #fff;
+            background: var(--orange);
+            color: var(--white);
             border: none;
             padding: 10px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+            letter-spacing: -0.01em;
         }
         .download-btn:hover {
-            background: #1d4ed8;
+            background: #e67a00;
             transform: translateY(-1px);
         }
+        .download-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
         .content {
             max-width: 800px;
-            margin: 40px auto;
-            padding: 0 40px;
+            margin: 48px auto;
+            padding: 0 48px;
         }
+
         .card {
-            background: #ffffff;
+            background: var(--dark2);
+            border: 1px solid var(--mid);
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         .card-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--mid);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .card-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
         .card-meta {
-            font-size: 12px;
-            color: #94a3b8;
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: -0.01em;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
         th {
-            background: #f8fafc;
+            background: var(--dark3);
             text-align: left;
-            padding: 12px 24px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
+            padding: 12px 28px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--mid);
         }
         td {
-            padding: 16px 24px;
+            padding: 18px 28px;
             font-size: 14px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            letter-spacing: -0.01em;
         }
         td:first-child {
-            font-weight: 600;
-            color: #16a34a;
+            font-weight: 700;
+            color: #4ade80;
         }
+        td:last-child {
+            color: rgba(255,255,255,0.6);
+        }
+
         .footer-note {
             text-align: center;
             margin-top: 32px;
-            font-size: 12px;
-            color: #cbd5e1;
-            letter-spacing: 1px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .header { padding: 0 24px; }
+            .content { padding: 0 24px; margin: 32px auto; }
+            .card-header { padding: 16px 20px; }
+            th, td { padding: 12px 20px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-left">
-            <div class="logo">R<span>E</span>CESS</div>
-            <div class="badge">COMPLETE</div>
+            <img
+                src="https://cdn.prod.website-files.com/64ff2fd4c0c0c110f9ca6543/64ff74900e799e5bd71e5bca_recess.svg"
+                alt="recess"
+                class="logo-img"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+            >
+            <span class="logo-fallback" style="display:none">recess</span>
+            <div class="badge">Complete</div>
         </div>
-        <a class="download-btn" href="${blobUrl}" download="Recess_Output_${fileDate}.xlsx">Download XLSX</a>
+        <a class="download-btn" href="${blobUrl}" download="Recess_Output_${fileDate}.xlsx">
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Download XLSX
+        </a>
     </div>
+
     <div class="content">
         <div class="card">
             <div class="card-header">
@@ -342,29 +532,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="footer-note">Proof of Concept v0.1</div>
+        <div class="footer-note">Proof of Concept v0.1 &mdash; recess automation</div>
     </div>
 </body>
-</html>`);
-                    resultTab.document.close();
-
-                    // Reset main button
-                    btn.classList.remove('success');
-                    btn.textContent = 'Press here, Recess user';
-                    status.textContent = 'Output opened in new tab';
-                    status.classList.add('active');
-
-                    setTimeout(() => {
-                        status.textContent = '';
-                        status.classList.remove('active');
-                    }, 3000);
-
-                } catch (err) {
-                    btn.classList.remove('success');
-                    btn.textContent = 'Press here, Recess user';
-                    status.textContent = 'Error: ' + err.message;
-                }
-            }, 500);
+</html>`;
         }
     </script>
 </body>
