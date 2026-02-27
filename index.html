@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recess — Automation Hub</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 8px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: #2563EB;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+        }
+
+        .button-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .big-button {
+            background: #2563EB;
+            color: #ffffff;
+            border: none;
+            padding: 28px 64px;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 24px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .big-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+        }
+
+        .big-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .big-button.success {
+            background: #16a34a;
+            box-shadow: 0 4px 24px rgba(22, 163, 74, 0.3);
+        }
+
+        .big-button .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .status {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #94a3b8;
+            height: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .status.active {
+            color: #16a34a;
+            font-weight: 500;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 24px;
+            font-size: 12px;
+            color: #cbd5e1;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .logo { font-size: 32px; letter-spacing: 6px; }
+            .big-button { padding: 24px 48px; font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">R<span>E</span>CESS</div>
+        <div class="subtitle">Automation Hub</div>
+
+        <div class="button-wrapper">
+            <button class="big-button" id="mainButton" onclick="handleClick(event)">
+                Press here, Recess user
+            </button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <div class="footer">Proof of Concept v0.1</div>
+
+    <script>
+        function handleClick(e) {
+            const btn = document.getElementById('mainButton');
+            const status = document.getElementById('status');
+
+            // Ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            const rect = btn.getBoundingClientRect();
+            ripple.style.left = (e.clientX - rect.left) + 'px';
+            ripple.style.top = (e.clientY - rect.top) + 'px';
+            ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            // Generate XLSX
+            status.textContent = 'Generating...';
+            status.classList.remove('active');
+
+            setTimeout(() => {
+                try {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace('T', ' ').split('.')[0];
+                    const fileDate = now.toISOString().slice(0, 10).replace(/-/g, '');
+
+                    const data = [
+                        ['Status', 'Timestamp', 'Message'],
+                        ['Confirmed', timestamp, 'Button pressed. Recess workflow triggered.']
+                    ];
+
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+
+                    // Column widths
+                    ws['!cols'] = [
+                        { wch: 15 },
+                        { wch: 22 },
+                        { wch: 45 }
+                    ];
+
+                    XLSX.utils.book_append_sheet(wb, ws, 'Recess Output');
+                    XLSX.writeFile(wb, `Recess_Output_${fileDate}.xlsx`);
+
+                    // Success state
+                    btn.classList.add('success');
+                    btn.textContent = 'Done';
+                    status.textContent = 'XLSX downloaded successfully';
+                    status.classList.add('active');
+
+                    // Reset after 2s
+                    setTimeout(() => {
+                        btn.classList.remove('success');
+                        btn.textContent = 'Press here, Recess user';
+                        status.textContent = '';
+                        status.classList.remove('active');
+                    }, 2000);
+
+                } catch (err) {
+                    status.textContent = 'Error: ' + err.message;
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>
