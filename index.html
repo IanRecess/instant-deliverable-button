@@ -340,9 +340,8 @@
 '.instruction .accent { color: var(--teal); }' +
 '.dog-wrapper { position: relative; display: inline-block; cursor: pointer; user-select: none; -webkit-user-select: none; margin-bottom: 8px; overflow: hidden; border-radius: 16px; border: 2px solid var(--mid); transition: border-color 0.2s; }' +
 '.dog-wrapper:hover { border-color: var(--teal); }' +
-'.dog-top { width: 100%; max-width: 460px; height: 190px; object-fit: cover; object-position: center top; display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: center bottom; }' +
-'.dog-bottom { width: 100%; max-width: 460px; height: 190px; object-fit: cover; object-position: center bottom; display: block; }' +
-'.dog-top.pet { transform: perspective(400px) rotateX(18deg) translateY(6px) scale(0.98); }' +
+'.dog-img { width: 100%; max-width: 460px; height: 380px; object-fit: cover; display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }' +
+'.dog-img.pet { transform: scale(0.95); }' +
 '.heart-float { position: absolute; font-size: 28px; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 10; }' +
 '@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.4); } }' +
 '.mascot-card { background: var(--dark2); border: 1px solid var(--mid); border-radius: 12px; padding: 20px 28px; margin-top: 20px; text-align: center; }' +
@@ -353,7 +352,7 @@
 '.pet-counter strong { color: var(--teal); font-weight: 700; }' +
 '.click-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 4px; letter-spacing: 0.3px; }' +
 '.footer-note { text-align: center; margin-top: 28px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px; }' +
-'@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 28px auto; } .dog-top, .dog-bottom { height: 150px; } .instruction { font-size: 20px; } .mascot-name { font-size: 22px; } }' +
+'@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 28px auto; } .dog-img { height: 300px; } .instruction { font-size: 20px; } .mascot-name { font-size: 22px; } }' +
 '</style>' +
 '</head>' +
 '<body>' +
@@ -372,8 +371,7 @@
 '<div class="status-text">Button has been pressed.</div>' +
 '<div class="instruction">Please pet the <span class="accent">dog.</span></div>' +
 '<div class="dog-wrapper" id="dogWrapper" onclick="petDog(event)">' +
-'<img class="dog-top" id="dogTop" src="' + dogUrl + '" alt="' + dogName + ' - top half">' +
-'<img class="dog-bottom" src="' + dogUrl + '" alt="' + dogName + ' - bottom half">' +
+'<img class="dog-img" id="dogImg" src="' + dogUrl + '" alt="' + dogName + '">' +
 '</div>' +
 '<div class="pet-counter" id="petCounter">Click ' + dogName + ' to pet</div>' +
 '<div class="click-hint">Each click = one pet</div>' +
@@ -401,12 +399,12 @@
 '"This is what peak performance looks like."' +
 '];' +
 'function petDog(e) {' +
-'var top = document.getElementById("dogTop");' +
+'var img = document.getElementById("dogImg");' +
 'var counter = document.getElementById("petCounter");' +
 'var wrapper = document.getElementById("dogWrapper");' +
 'petCount++;' +
-'top.classList.add("pet");' +
-'setTimeout(function() { top.classList.remove("pet"); }, 350);' +
+'img.classList.add("pet");' +
+'setTimeout(function() { img.classList.remove("pet"); }, 350);' +
 'var heart = document.createElement("div");' +
 'heart.classList.add("heart-float");' +
 'heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];' +
