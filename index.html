@@ -160,8 +160,10 @@
             btn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
 
-            // Generate XLSX
-            status.textContent = 'Generating...';
+            // Update button state
+            btn.classList.add('success');
+            btn.textContent = 'Generating...';
+            status.textContent = '';
             status.classList.remove('active');
 
             setTimeout(() => {
@@ -170,6 +172,7 @@
                     const timestamp = now.toISOString().replace('T', ' ').split('.')[0];
                     const fileDate = now.toISOString().slice(0, 10).replace(/-/g, '');
 
+                    // Build XLSX in memory
                     const data = [
                         ['Status', 'Timestamp', 'Message'],
                         ['Confirmed', timestamp, 'Button pressed. Recess workflow triggered.']
@@ -177,35 +180,191 @@
 
                     const wb = XLSX.utils.book_new();
                     const ws = XLSX.utils.aoa_to_sheet(data);
-
-                    // Column widths
-                    ws['!cols'] = [
-                        { wch: 15 },
-                        { wch: 22 },
-                        { wch: 45 }
-                    ];
-
+                    ws['!cols'] = [{ wch: 15 }, { wch: 22 }, { wch: 45 }];
                     XLSX.utils.book_append_sheet(wb, ws, 'Recess Output');
-                    XLSX.writeFile(wb, `Recess_Output_${fileDate}.xlsx`);
 
-                    // Success state
-                    btn.classList.add('success');
-                    btn.textContent = 'Done';
-                    status.textContent = 'XLSX downloaded successfully';
+                    // Generate download blob
+                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    // Open results in new tab
+                    const resultTab = window.open('', '_blank');
+                    resultTab.document.write(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recess — Output</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+        .logo span { color: #2563EB; }
+        .badge {
+            background: #dcfce7;
+            color: #16a34a;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+        .download-btn {
+            background: #2563EB;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .download-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .content {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .card-meta {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f8fafc;
+            text-align: left;
+            padding: 12px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        td {
+            padding: 16px 24px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        td:first-child {
+            font-weight: 600;
+            color: #16a34a;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 12px;
+            color: #cbd5e1;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">R<span>E</span>CESS</div>
+            <div class="badge">COMPLETE</div>
+        </div>
+        <a class="download-btn" href="${blobUrl}" download="Recess_Output_${fileDate}.xlsx">Download XLSX</a>
+    </div>
+    <div class="content">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Workflow Output</div>
+                <div class="card-meta">Generated ${timestamp}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Timestamp</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Confirmed</td>
+                        <td>${timestamp}</td>
+                        <td>Button pressed. Recess workflow triggered.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer-note">Proof of Concept v0.1</div>
+    </div>
+</body>
+</html>`);
+                    resultTab.document.close();
+
+                    // Reset main button
+                    btn.classList.remove('success');
+                    btn.textContent = 'Press here, Recess user';
+                    status.textContent = 'Output opened in new tab';
                     status.classList.add('active');
 
-                    // Reset after 2s
                     setTimeout(() => {
-                        btn.classList.remove('success');
-                        btn.textContent = 'Press here, Recess user';
                         status.textContent = '';
                         status.classList.remove('active');
-                    }, 2000);
+                    }, 3000);
 
                 } catch (err) {
+                    btn.classList.remove('success');
+                    btn.textContent = 'Press here, Recess user';
                     status.textContent = 'Error: ' + err.message;
                 }
-            }, 300);
+            }, 500);
         }
     </script>
 </body>
