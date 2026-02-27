@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recess — Automation Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --teal: #13bad5;
@@ -33,7 +32,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Header */
         .header {
             padding: 0 48px;
             height: 68px;
@@ -84,7 +82,6 @@
             50% { opacity: 0.3; }
         }
 
-        /* Main */
         .main {
             flex: 1;
             display: flex;
@@ -141,7 +138,6 @@
             margin-bottom: 56px;
         }
 
-        /* Button */
         .big-button {
             background: var(--teal);
             color: var(--white);
@@ -201,7 +197,6 @@
             font-weight: 600;
         }
 
-        /* Footer */
         .footer {
             padding: 20px 48px;
             border-top: 1px solid rgba(255,255,255,0.05);
@@ -270,57 +265,39 @@
             setTimeout(() => ripple.remove(), 600);
 
             btn.classList.add('generating');
-            btn.textContent = 'Generating...';
+            btn.textContent = 'Fetching good boy...';
             status.textContent = '';
             status.classList.remove('active');
 
-            setTimeout(() => {
-                try {
-                    const now = new Date();
-                    const timestamp = now.toISOString().replace('T', ' ').split('.')[0];
-                    const fileDate = now.toISOString().slice(0, 10).replace(/-/g, '');
-
-                    // Build XLSX
-                    const data = [
-                        ['Status', 'Timestamp', 'Message'],
-                        ['Confirmed', timestamp, 'Button pressed. Recess workflow triggered.']
-                    ];
-                    const wb = XLSX.utils.book_new();
-                    const ws = XLSX.utils.aoa_to_sheet(data);
-                    ws['!cols'] = [{ wch: 15 }, { wch: 22 }, { wch: 45 }];
-                    XLSX.utils.book_append_sheet(wb, ws, 'Recess Output');
-
-                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    const blobUrl = URL.createObjectURL(blob);
-
-                    // Open output tab
+            // Fetch random dog image
+            fetch('https://dog.ceo/api/breeds/image/random')
+                .then(r => r.json())
+                .then(data => {
+                    const dogUrl = data.message;
                     const resultTab = window.open('', '_blank');
-                    resultTab.document.write(buildOutputPage(timestamp, fileDate, blobUrl));
+                    resultTab.document.write(buildOutputPage(dogUrl));
                     resultTab.document.close();
 
-                    // Reset
                     btn.classList.remove('generating');
                     btn.textContent = 'Press here, Recess user';
-                    status.textContent = 'Output opened in new tab';
+                    status.textContent = 'Good boy opened in new tab';
                     status.classList.add('active');
                     setTimeout(() => { status.textContent = ''; status.classList.remove('active'); }, 3000);
-
-                } catch (err) {
+                })
+                .catch(err => {
                     btn.classList.remove('generating');
                     btn.textContent = 'Press here, Recess user';
                     status.textContent = 'Error: ' + err.message;
-                }
-            }, 600);
+                });
         }
 
-        function buildOutputPage(timestamp, fileDate, blobUrl) {
+        function buildOutputPage(dogUrl) {
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recess — Output</title>
+    <title>Recess — Pet the Dog</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -417,62 +394,88 @@
         }
 
         .content {
-            max-width: 800px;
+            max-width: 600px;
             margin: 48px auto;
             padding: 0 48px;
+            text-align: center;
         }
 
-        .card {
-            background: var(--dark2);
-            border: 1px solid var(--mid);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .card-header {
-            padding: 20px 28px;
-            border-bottom: 1px solid var(--mid);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .card-title {
+        .status-text {
             font-size: 15px;
             font-weight: 700;
+            color: #4ade80;
+            margin-bottom: 8px;
             letter-spacing: -0.02em;
         }
-        .card-meta {
-            font-size: 11px;
-            color: rgba(255,255,255,0.35);
-            letter-spacing: -0.01em;
+
+        .instruction {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 32px;
+            line-height: 1.2;
+        }
+        .instruction .accent { color: var(--teal); }
+
+        .dog-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            margin-bottom: 16px;
         }
 
-        table {
+        .dog-container img {
             width: 100%;
-            border-collapse: collapse;
+            max-width: 460px;
+            height: 380px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 2px solid var(--mid);
+            display: block;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center bottom;
         }
-        th {
-            background: var(--dark3);
-            text-align: left;
-            padding: 12px 28px;
-            font-size: 10px;
-            font-weight: 700;
+
+        .dog-container img.pet {
+            transform: perspective(600px) rotateX(15deg) scale(0.97);
+        }
+
+        .dog-container img:hover {
+            border-color: var(--teal);
+        }
+
+        .pet-counter {
+            margin-top: 16px;
+            font-size: 13px;
             color: rgba(255,255,255,0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--mid);
-        }
-        td {
-            padding: 18px 28px;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
             letter-spacing: -0.01em;
+            transition: all 0.2s;
         }
-        td:first-child {
+        .pet-counter strong {
+            color: var(--teal);
             font-weight: 700;
-            color: #4ade80;
         }
-        td:last-child {
-            color: rgba(255,255,255,0.6);
+
+        .heart-float {
+            position: absolute;
+            font-size: 28px;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
+        }
+
+        .click-hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            margin-top: 4px;
+            letter-spacing: 0.3px;
         }
 
         .footer-note {
@@ -486,8 +489,8 @@
         @media (max-width: 600px) {
             .header { padding: 0 24px; }
             .content { padding: 0 24px; margin: 32px auto; }
-            .card-header { padding: 16px 20px; }
-            th, td { padding: 12px 20px; }
+            .dog-container img { height: 280px; }
+            .instruction { font-size: 20px; }
         }
     </style>
 </head>
@@ -503,37 +506,66 @@
             <span class="logo-fallback" style="display:none">recess</span>
             <div class="badge">Complete</div>
         </div>
-        <a class="download-btn" href="${blobUrl}" download="Recess_Output_${fileDate}.xlsx">
+        <a class="download-btn" id="downloadBtn" href="${dogUrl}" download="recess_good_boy.jpg" target="_blank">
             <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            Download XLSX
+            Download Dog
         </a>
     </div>
 
     <div class="content">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Workflow Output</div>
-                <div class="card-meta">Generated ${timestamp}</div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Timestamp</th>
-                        <th>Message</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Confirmed</td>
-                        <td>${timestamp}</td>
-                        <td>Button pressed. Recess workflow triggered.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="status-text">Button has been pressed.</div>
+        <div class="instruction">Please pet the <span class="accent">dog.</span></div>
+
+        <div class="dog-container" id="dogContainer" onclick="petDog(event)">
+            <img id="dogImg" src="${dogUrl}" alt="A good dog" crossorigin="anonymous">
         </div>
+
+        <div class="pet-counter" id="petCounter">Click the dog to pet it</div>
+        <div class="click-hint">Each click = one pet</div>
+
         <div class="footer-note">Proof of Concept v0.1 &mdash; recess automation</div>
     </div>
+
+    <script>
+        let petCount = 0;
+        const messages = [
+            'Good boy appreciates that.',
+            'Tail wagging intensifies.',
+            'The goodest boy.',
+            'Pet received. Happiness increased.',
+            'Bork bork. More please.',
+            'This dog is having the best day.',
+            'You are now this dog\\'s favorite person.',
+            'Maximum tail wag achieved.',
+            'Dog.exe is running at peak happiness.',
+            'This is what peak performance looks like.'
+        ];
+
+        function petDog(e) {
+            const img = document.getElementById('dogImg');
+            const counter = document.getElementById('petCounter');
+            const container = document.getElementById('dogContainer');
+            petCount++;
+
+            // Bow animation
+            img.classList.add('pet');
+            setTimeout(() => img.classList.remove('pet'), 300);
+
+            // Float a heart from click position
+            const heart = document.createElement('div');
+            heart.classList.add('heart-float');
+            heart.textContent = petCount % 5 === 0 ? '\u2764\uFE0F' : ['\U0001F49B', '\U0001F499', '\U0001F49A', '\U0001F90D'][Math.floor(Math.random() * 4)];
+            const rect = container.getBoundingClientRect();
+            heart.style.left = (e.clientX - rect.left - 14) + 'px';
+            heart.style.top = (e.clientY - rect.top - 14) + 'px';
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+
+            // Update counter
+            const msg = messages[Math.min(petCount - 1, messages.length - 1)];
+            counter.innerHTML = '<strong>' + petCount + ' pet' + (petCount === 1 ? '' : 's') + '</strong> — ' + msg;
+        }
+    </script>
 </body>
 </html>`;
         }
