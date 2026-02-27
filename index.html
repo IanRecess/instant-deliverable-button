@@ -351,6 +351,9 @@
 '.pet-counter { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: -0.01em; transition: all 0.2s; }' +
 '.pet-counter strong { color: var(--teal); font-weight: 700; }' +
 '.click-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 4px; letter-spacing: 0.3px; }' +
+'.fetch-btn { background: var(--teal); color: var(--white); border: none; padding: 14px 32px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.15s; letter-spacing: -0.01em; margin-top: 24px; display: inline-flex; align-items: center; gap: 8px; }' +
+'.fetch-btn:hover { background: #0fa3bb; transform: translateY(-1px); }' +
+'.fetch-btn.loading { opacity: 0.6; pointer-events: none; }' +
 '.footer-note { text-align: center; margin-top: 28px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px; }' +
 '@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 28px auto; } .dog-img { height: 300px; } .instruction { font-size: 20px; } .mascot-name { font-size: 22px; } }' +
 '</style>' +
@@ -380,24 +383,16 @@
 '<div class="mascot-title">Official Recess Mascot</div>' +
 '<div class="mascot-desc">Randomly recruited from the internet. Duties include accepting pets, looking adorable, and representing the recess brand with maximum tail energy.</div>' +
 '</div>' +
+'<button class="fetch-btn" id="fetchBtn" onclick="fetchNewMascot()">\u21BB Fetch another mascot</button>' +
 '<div class="footer-note">Proof of Concept v0.1 \u2014 recess automation</div>' +
 '</div>' +
 '<script>' +
 'var petCount = 0;' +
 'var dogName = "' + dogName + '";' +
 'var hearts = ' + heartsJSON + ';' +
-'var messages = [' +
-'"' + dogName + ' appreciates that.",' +
-'"Tail wagging intensifies.",' +
-'"The goodest boy.",' +
-'"Pet received. Happiness increased.",' +
-'"Bork bork. More please.",' +
-'"' + dogName + ' is having the best day.",' +
-'"You are now the favorite human of ' + dogName + '.",' +
-'"Maximum tail wag achieved.",' +
-'"' + dogName + '.exe is running at peak happiness.",' +
-'"This is what peak performance looks like."' +
-'];' +
+'var dogNames = ["Biscuit","Waffles","Mochi","Churro","Pretzel","Nugget","Pickles","Bean","Tofu","Nacho","Sprout","Pepper","Gizmo","Noodle","Boba","Truffle","Maple","Clover","Ziggy","Cosmo","Moose","Bear","Teddy","Scout","Banjo","Roux","Olive","Basil","Sage","Juniper","Captain","Rocket","Turbo","Blitz","Flash"];' +
+'function buildMessages(n) { return [n + " appreciates that.","Tail wagging intensifies.","The goodest boy.","Pet received. Happiness increased.","Bork bork. More please.",n + " is having the best day.","You are now the favorite human of " + n + ".","Maximum tail wag achieved.",n + ".exe is running at peak happiness.","This is what peak performance looks like."]; }' +
+'var messages = buildMessages(dogName);' +
 'function petDog(e) {' +
 'var img = document.getElementById("dogImg");' +
 'var counter = document.getElementById("petCounter");' +
@@ -415,6 +410,31 @@
 'setTimeout(function() { heart.remove(); }, 1000);' +
 'var msg = messages[Math.min(petCount - 1, messages.length - 1)];' +
 'counter.innerHTML = "<strong>" + petCount + " pet" + (petCount === 1 ? "" : "s") + "</strong> \u2014 " + msg;' +
+'}' +
+'function fetchNewMascot() {' +
+'var btn = document.getElementById("fetchBtn");' +
+'btn.classList.add("loading");' +
+'btn.textContent = "Fetching...";' +
+'fetch("https://dog.ceo/api/breeds/image/random").then(function(r) { return r.json(); }).then(function(data) {' +
+'var newUrl = data.message;' +
+'dogName = dogNames[Math.floor(Math.random() * dogNames.length)];' +
+'petCount = 0;' +
+'messages = buildMessages(dogName);' +
+'document.getElementById("dogImg").src = newUrl;' +
+'document.getElementById("dogImg").alt = dogName;' +
+'document.getElementById("petCounter").textContent = "Click " + dogName + " to pet";' +
+'document.querySelector(".mascot-name").textContent = dogName;' +
+'document.querySelector(".download-btn").href = newUrl;' +
+'document.querySelector(".download-btn").download = "recess_mascot_" + dogName.toLowerCase() + ".jpg";' +
+'var dlBtn = document.querySelector(".download-btn");' +
+'dlBtn.innerHTML = "<svg viewBox=\\"0 0 24 24\\"><path d=\\"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z\\"/></svg>Download " + dogName;' +
+'document.title = "Recess \\u2014 Meet " + dogName;' +
+'btn.classList.remove("loading");' +
+'btn.textContent = "\\u21BB Fetch another mascot";' +
+'}).catch(function() {' +
+'btn.classList.remove("loading");' +
+'btn.textContent = "\\u21BB Fetch another mascot";' +
+'});' +
 '}' +
 '<\/script>' +
 '</body>' +
