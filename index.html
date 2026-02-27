@@ -240,7 +240,7 @@
             <div class="subtitle">Press to trigger workflow and generate your deliverable.</div>
 
             <button class="big-button" id="mainButton" onclick="handleClick(event)">
-                Press here, Recess user
+                Press this button
             </button>
 
             <div class="status" id="status"></div>
@@ -291,21 +291,21 @@
                     if (!resultTab) {
                         status.textContent = 'Pop-up blocked. Please allow pop-ups for this site.';
                         btn.classList.remove('generating');
-                        btn.textContent = 'Press here, Recess user';
+                        btn.textContent = 'Press this button';
                         return;
                     }
                     resultTab.document.write(buildOutputPage(dogUrl, dogName));
                     resultTab.document.close();
 
                     btn.classList.remove('generating');
-                    btn.textContent = 'Press here, Recess user';
+                    btn.textContent = 'Press this button';
                     status.textContent = dogName + ' opened in new tab';
                     status.classList.add('active');
                     setTimeout(function() { status.textContent = ''; status.classList.remove('active'); }, 3000);
                 })
                 .catch(function(err) {
                     btn.classList.remove('generating');
-                    btn.textContent = 'Press here, Recess user';
+                    btn.textContent = 'Press this button';
                     status.textContent = 'Error: ' + err.message;
                 });
         }
