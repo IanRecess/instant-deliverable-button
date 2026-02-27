@@ -250,11 +250,24 @@
     <div class="footer">Proof of Concept v0.1 &mdash; recess automation</div>
 
     <script>
+        var dogNames = [
+            'Biscuit', 'Waffles', 'Mochi', 'Churro', 'Pretzel',
+            'Nugget', 'Pickles', 'Bean', 'Tofu', 'Nacho',
+            'Sprout', 'Pepper', 'Gizmo', 'Noodle', 'Boba',
+            'Truffle', 'Maple', 'Clover', 'Ziggy', 'Cosmo',
+            'Moose', 'Bear', 'Teddy', 'Scout', 'Banjo',
+            'Roux', 'Olive', 'Basil', 'Sage', 'Juniper',
+            'Captain', 'Rocket', 'Turbo', 'Blitz', 'Flash'
+        ];
+
+        function getRandomName() {
+            return dogNames[Math.floor(Math.random() * dogNames.length)];
+        }
+
         function handleClick(e) {
             var btn = document.getElementById('mainButton');
             var status = document.getElementById('status');
 
-            // Ripple
             var ripple = document.createElement('span');
             ripple.classList.add('ripple');
             var rect = btn.getBoundingClientRect();
@@ -269,11 +282,11 @@
             status.textContent = '';
             status.classList.remove('active');
 
-            // Fetch random dog image
             fetch('https://dog.ceo/api/breeds/image/random')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     var dogUrl = data.message;
+                    var dogName = getRandomName();
                     var resultTab = window.open('', '_blank');
                     if (!resultTab) {
                         status.textContent = 'Pop-up blocked. Please allow pop-ups for this site.';
@@ -281,12 +294,12 @@
                         btn.textContent = 'Press here, Recess user';
                         return;
                     }
-                    resultTab.document.write(buildOutputPage(dogUrl));
+                    resultTab.document.write(buildOutputPage(dogUrl, dogName));
                     resultTab.document.close();
 
                     btn.classList.remove('generating');
                     btn.textContent = 'Press here, Recess user';
-                    status.textContent = 'Good boy opened in new tab';
+                    status.textContent = dogName + ' opened in new tab';
                     status.classList.add('active');
                     setTimeout(function() { status.textContent = ''; status.classList.remove('active'); }, 3000);
                 })
@@ -297,7 +310,7 @@
                 });
         }
 
-        function buildOutputPage(dogUrl) {
+        function buildOutputPage(dogUrl, dogName) {
             var hearts = ['\u2764\uFE0F', '\uD83D\uDC9B', '\uD83D\uDC99', '\uD83D\uDC9A', '\uD83E\uDD0D'];
             var heartsJSON = JSON.stringify(hearts);
 
@@ -306,7 +319,7 @@
 '<head>' +
 '<meta charset="UTF-8">' +
 '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-'<title>Recess \u2014 Pet the Dog</title>' +
+'<title>Recess \u2014 Meet ' + dogName + '</title>' +
 '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' +
 '<style>' +
 ':root { --teal: #13bad5; --teal-dark: #0fa3bb; --teal-dim: rgba(19,186,213,0.12); --orange: #ff8900; --black: #0a0a0a; --dark: #111214; --dark2: #1a1c1f; --dark3: #222428; --mid: #2e3035; --white: #ffffff; }' +
@@ -321,21 +334,26 @@
 '.download-btn { background: var(--orange); color: var(--white); border: none; padding: 10px 24px; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; letter-spacing: -0.01em; }' +
 '.download-btn:hover { background: #e67a00; transform: translateY(-1px); }' +
 '.download-btn svg { width: 14px; height: 14px; fill: currentColor; }' +
-'.content { max-width: 600px; margin: 48px auto; padding: 0 48px; text-align: center; }' +
+'.content { max-width: 600px; margin: 40px auto; padding: 0 48px; text-align: center; }' +
 '.status-text { font-size: 15px; font-weight: 700; color: #4ade80; margin-bottom: 8px; letter-spacing: -0.02em; }' +
-'.instruction { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 32px; line-height: 1.2; }' +
+'.instruction { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 28px; line-height: 1.2; }' +
 '.instruction .accent { color: var(--teal); }' +
-'.dog-container { position: relative; display: inline-block; cursor: pointer; user-select: none; -webkit-user-select: none; margin-bottom: 16px; }' +
-'.dog-container img { width: 100%; max-width: 460px; height: 380px; object-fit: cover; border-radius: 16px; border: 2px solid var(--mid); display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: center bottom; }' +
-'.dog-container img.pet { transform: perspective(600px) rotateX(15deg) scale(0.97); }' +
-'.dog-container img:hover { border-color: var(--teal); }' +
-'.pet-counter { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: -0.01em; transition: all 0.2s; }' +
-'.pet-counter strong { color: var(--teal); font-weight: 700; }' +
+'.dog-wrapper { position: relative; display: inline-block; cursor: pointer; user-select: none; -webkit-user-select: none; margin-bottom: 8px; overflow: hidden; border-radius: 16px; border: 2px solid var(--mid); transition: border-color 0.2s; }' +
+'.dog-wrapper:hover { border-color: var(--teal); }' +
+'.dog-top { width: 100%; max-width: 460px; height: 190px; object-fit: cover; object-position: center top; display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: center bottom; }' +
+'.dog-bottom { width: 100%; max-width: 460px; height: 190px; object-fit: cover; object-position: center bottom; display: block; }' +
+'.dog-top.pet { transform: perspective(400px) rotateX(18deg) translateY(6px) scale(0.98); }' +
 '.heart-float { position: absolute; font-size: 28px; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 10; }' +
 '@keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.4); } }' +
+'.mascot-card { background: var(--dark2); border: 1px solid var(--mid); border-radius: 12px; padding: 20px 28px; margin-top: 20px; text-align: center; }' +
+'.mascot-name { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; color: var(--teal); margin-bottom: 4px; }' +
+'.mascot-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--orange); margin-bottom: 8px; }' +
+'.mascot-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.5; letter-spacing: -0.01em; }' +
+'.pet-counter { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: -0.01em; transition: all 0.2s; }' +
+'.pet-counter strong { color: var(--teal); font-weight: 700; }' +
 '.click-hint { font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 4px; letter-spacing: 0.3px; }' +
-'.footer-note { text-align: center; margin-top: 32px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px; }' +
-'@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 32px auto; } .dog-container img { height: 280px; } .instruction { font-size: 20px; } }' +
+'.footer-note { text-align: center; margin-top: 28px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px; }' +
+'@media (max-width: 600px) { .header { padding: 0 24px; } .content { padding: 0 24px; margin: 28px auto; } .dog-top, .dog-bottom { height: 150px; } .instruction { font-size: 20px; } .mascot-name { font-size: 22px; } }' +
 '</style>' +
 '</head>' +
 '<body>' +
@@ -345,50 +363,57 @@
 '<span class="logo-fallback" style="display:none">recess</span>' +
 '<div class="badge">Complete</div>' +
 '</div>' +
-'<a class="download-btn" href="' + dogUrl + '" download="recess_good_boy.jpg" target="_blank">' +
+'<a class="download-btn" href="' + dogUrl + '" download="recess_mascot_' + dogName.toLowerCase() + '.jpg" target="_blank">' +
 '<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>' +
-'Download Dog' +
+'Download ' + dogName +
 '</a>' +
 '</div>' +
 '<div class="content">' +
 '<div class="status-text">Button has been pressed.</div>' +
 '<div class="instruction">Please pet the <span class="accent">dog.</span></div>' +
-'<div class="dog-container" id="dogContainer" onclick="petDog(event)">' +
-'<img id="dogImg" src="' + dogUrl + '" alt="A good dog">' +
+'<div class="dog-wrapper" id="dogWrapper" onclick="petDog(event)">' +
+'<img class="dog-top" id="dogTop" src="' + dogUrl + '" alt="' + dogName + ' - top half">' +
+'<img class="dog-bottom" src="' + dogUrl + '" alt="' + dogName + ' - bottom half">' +
 '</div>' +
-'<div class="pet-counter" id="petCounter">Click the dog to pet it</div>' +
+'<div class="pet-counter" id="petCounter">Click ' + dogName + ' to pet</div>' +
 '<div class="click-hint">Each click = one pet</div>' +
+'<div class="mascot-card">' +
+'<div class="mascot-name">' + dogName + '</div>' +
+'<div class="mascot-title">Official Recess Mascot</div>' +
+'<div class="mascot-desc">Randomly recruited from the internet. Duties include accepting pets, looking adorable, and representing the recess brand with maximum tail energy.</div>' +
+'</div>' +
 '<div class="footer-note">Proof of Concept v0.1 \u2014 recess automation</div>' +
 '</div>' +
 '<script>' +
 'var petCount = 0;' +
+'var dogName = "' + dogName + '";' +
 'var hearts = ' + heartsJSON + ';' +
 'var messages = [' +
-'"Good boy appreciates that.",' +
+'"' + dogName + ' appreciates that.",' +
 '"Tail wagging intensifies.",' +
 '"The goodest boy.",' +
 '"Pet received. Happiness increased.",' +
 '"Bork bork. More please.",' +
-'"This dog is having the best day.",' +
-'"You are now the favorite person.",' +
+'"' + dogName + ' is having the best day.",' +
+'"You are now ' + dogName + '\\'s favorite person.",' +
 '"Maximum tail wag achieved.",' +
-'"Dog.exe is running at peak happiness.",' +
+'"' + dogName + '.exe is running at peak happiness.",' +
 '"This is what peak performance looks like."' +
 '];' +
 'function petDog(e) {' +
-'var img = document.getElementById("dogImg");' +
+'var top = document.getElementById("dogTop");' +
 'var counter = document.getElementById("petCounter");' +
-'var container = document.getElementById("dogContainer");' +
+'var wrapper = document.getElementById("dogWrapper");' +
 'petCount++;' +
-'img.classList.add("pet");' +
-'setTimeout(function() { img.classList.remove("pet"); }, 300);' +
+'top.classList.add("pet");' +
+'setTimeout(function() { top.classList.remove("pet"); }, 350);' +
 'var heart = document.createElement("div");' +
 'heart.classList.add("heart-float");' +
 'heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];' +
-'var rect = container.getBoundingClientRect();' +
+'var rect = wrapper.getBoundingClientRect();' +
 'heart.style.left = (e.clientX - rect.left - 14) + "px";' +
 'heart.style.top = (e.clientY - rect.top - 14) + "px";' +
-'container.appendChild(heart);' +
+'wrapper.appendChild(heart);' +
 'setTimeout(function() { heart.remove(); }, 1000);' +
 'var msg = messages[Math.min(petCount - 1, messages.length - 1)];' +
 'counter.innerHTML = "<strong>" + petCount + " pet" + (petCount === 1 ? "" : "s") + "</strong> \u2014 " + msg;' +
